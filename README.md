@@ -1,5 +1,4 @@
 # Mate Maps
-=========
 
 Mate Maps is a small web app to find nearby places that sell mate (supermarkets, kiosks, cafés, etc.).  
 It uses OpenStreetMap data and Firebase so you can discover, add, and rate mate spots around you.
