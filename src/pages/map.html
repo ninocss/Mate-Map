@@ -105,6 +105,12 @@
     </div>
 </section>
 
+<footer>
+    <div class="footer-content">
+        <p>&copy; 2025 nino. All rights reserved. <a href="https://github.com/ninocss" target="_blank" rel="noopener noreferrer"><span>&#8618;</span> Github</a></p>
+    </div>
+</footer>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -147,8 +153,6 @@
         iconSize: [30, 46],
         iconAnchor: [15, 46],
         popupAnchor: [0, -40],
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        shadowSize: [50, 50],
         className: 'marker-supermarket'
     });
 
@@ -157,8 +161,6 @@
         iconSize: [28, 44],
         iconAnchor: [14, 44],
         popupAnchor: [0, -38],
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        shadowSize: [46, 46],
         className: 'marker-custom'
     });
 
@@ -625,15 +627,7 @@
                 clickPreviewMarker = L.marker(e.latlng, {
                     title: 'New place position',
                     opacity: 0.9,
-                    icon: L.icon({
-                        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34],
-                        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-                        shadowSize: [41, 41],
-                        className: 'map-click-preview'
-                    })
+                    icon: customPlaceIcon
                 }).addTo(map);
             } else {
                 clickPreviewMarker.setLatLng(e.latlng);
