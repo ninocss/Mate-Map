@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mate Maps</title>
+
+    <link rel="stylesheet" href="./src/styles/root.css">
+</head>
+<body>
+
+    <div class="background-glow"></div>
+
+    <nav>
+        <div class="logo">Mate Maps</div>
+        <div class="nav-links">
+            <a href="./index.html" class="active">Home</a>
+            <a href="./src/pages/map.html">Map</a>
+            <a href="./src/pages/about.html">About</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Find Your Fuel</h1>
+        <p class="subtitle">Locate the nearest Mate distributors, cafes, and kiosks instantly. Stay energized with the golden elixir.</p>
+        
+        <div class="search-container">
+            <input type="text" placeholder="Enter your city or zip code...">
+            <button class="cta-btn">Find</button>
+        </div>
+    </section>
+
+    <script>
+        const findBtn = document.querySelector('.cta-btn');
+        const searchInput = document.querySelector('.search-container input');
+
+        function goToMapWithQuery() {
+            const query = searchInput.value.trim();
+            if (query) {
+                const url = `./src/pages/map.html?q=${encodeURIComponent(query)}`;
+                window.location.href = url;
+            } else {
+                alert('Please enter a city or zip code.');
+            }
+        }
+
+        findBtn.addEventListener('click', goToMapWithQuery);
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                goToMapWithQuery();
+            }
+        });
+    </script>
+</body>
+</html>

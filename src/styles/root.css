@@ -1,0 +1,148 @@
+@import url('./index.css');
+@import url('./map.css');
+
+:root {
+    --gold-primary: #E5C15D;
+    --gold-highlight: #FFD700;
+    --gold-dark: #B89635;
+    --bg-dark: #0f0f11;
+    --bg-card: #1a1a1d;
+    --text-light: #f4f4f5;
+    --text-muted: #a1a1aa;
+    --glass-bg: rgba(15, 15, 17, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+/* Main Layout */
+main,
+.map-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+    isolation: isolate;
+}
+
+/* Map Container */
+.map-main .map,
+.map-main #map,
+.map-main iframe {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    border: none;
+    filter: grayscale(0.2) contrast(1.1); /* Subtle map styling */
+}
+
+/* Ambient Background Glow - Refined */
+.background-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: 
+        radial-gradient(circle at 50% 0%, rgba(229, 193, 93, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(229, 193, 93, 0.03) 0%, transparent 40%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Modern Navigation - Floating Style */
+nav {
+    position: fixed;
+    top: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+    max-width: 1000px;
+    padding: 0.75rem 1.5rem;
+    background: rgba(26, 26, 29, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px; /* Pill shape */
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: linear-gradient(to right, var(--gold-highlight), var(--gold-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo span {
+    color: var(--gold-primary);
+}
+
+.nav-links {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    transition: all 0.2s ease;
+}
+
+.nav-links a:hover {
+    color: var(--text-light);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-links a.active,
+.nav-links a.cta {
+    background: var(--gold-primary);
+    color: var(--bg-dark);
+    font-weight: 600;
+}
+
+.nav-links a.cta:hover {
+    background: var(--gold-highlight);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(229, 193, 93, 0.2);
+}
