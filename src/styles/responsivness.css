@@ -1,0 +1,253 @@
+@import url('./root.css');
+@import url('./map.css');
+
+/* =========================
+    Base / Non-responsive rules
+    ========================= */
+
+.nav-swipe-area {
+     position: fixed;
+     bottom: 0;
+     left: 0;
+     right: 0;
+     height: 150px;
+     z-index: 350;
+     pointer-events: auto;
+}
+
+/* =========================
+    Responsive breakpoints
+    Order: 900px -> 720px -> 480px
+    ========================= */
+
+@media (max-width: 900px) {
+     .nav-swipe-area::after {
+          content: "";
+          position: absolute;
+          bottom: 12px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 68px;
+          height: 4px;
+          border-radius: 9999px;
+          background: rgb(209, 223, 241);
+          box-shadow: 0 0 14px rgba(15, 23, 42, 0.9);
+          opacity: 0.6;
+          animation: nav-swipe-hint 1.8s ease-in-out infinite;
+     }
+
+     .map-main { padding: 0; }
+     .map-shell {
+          position: relative;
+          flex-direction: column;
+          height: calc(100vh - 56px);
+          min-height: 0;
+          background: #020617;
+     }
+     #map { flex: 1 1 auto; height: 100%; min-height: 0; }
+
+     .sidebar {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          top: auto;
+          flex: 0 0 auto;
+          max-height: 72vh;
+          padding: 1.5rem 1.25rem;
+          overflow-y: auto;
+          border-radius: 24px 24px 0 0;
+          background: #18181b;
+          box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+          border-top: 1px solid rgba(255,255,255,0.05);
+          z-index: 1150;
+          max-width: none;
+          width: 100%;
+          transform: translateY(100%) scale(0.96);
+          opacity: 0;
+          transition: transform 220ms cubic-bezier(.18,.9,.24,1.1),
+                          opacity 180ms ease-out,
+                          box-shadow 220ms ease-out;
+     }
+
+     .sidebar::before {
+          content: "";
+          position: sticky;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 40px;
+          height: 4px;
+          border-radius: 9999px;
+          margin: 0 0 1rem;
+          background: #3f3f46;
+          box-shadow: none;
+          opacity: 1;
+          pointer-events: none;
+          z-index: 5;
+     }
+
+     .sidebar.is-open {
+          transform: translateY(0%) scale(1);
+          opacity: 1;
+     }
+
+     .sidebar .logo h2 {
+          font-size: 1.25rem;
+          letter-spacing: -0.01em;
+          text-align: center;
+          text-transform: none;
+          margin: 0.5rem 0 0.25rem;
+     }
+
+     .sidebar small {
+          display: block;
+          text-align: center;
+          margin-bottom: 1.5rem;
+          font-size: 0.85rem;
+          opacity: 0.7;
+     }
+
+     /* Search card / actions */
+     .search-card {
+          margin: 0;
+          padding: 0;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+     }
+     .search-row { gap: 0.75rem; }
+     .search-actions {
+          flex-direction: column;
+          gap: 0.75rem;
+     }
+     .search-actions .btn-primary,
+     .search-actions .btn-secondary {
+          width: 100%;
+          justify-content: center;
+          padding-block: 0.85rem;
+          font-size: 0.9rem;
+     }
+
+     .radius-group {
+          margin-top: 0.5rem;
+          padding: 0;
+     }
+
+     /* Places list + place info */
+     .places-list {
+          max-height: none;
+          margin-top: 1rem;
+          padding-right: 0;
+          font-size: 0.9rem;
+     }
+     .info { font-size: 0.85rem; }
+
+     .status {
+          top: 1.4rem;
+          max-width: min(92%, 420px);
+          padding-inline: 0.8rem;
+          font-size: 0.78rem;
+     }
+     .map-click-tooltip {
+          background: rgba(15, 23, 42, 0.88);
+     }
+
+     body.sidebar-open {
+          padding-bottom: 0.5rem;
+     }
+}
+
+@media (max-width: 720px) {
+     .buttons-row { flex-direction: column; gap: 0.75rem; margin-top: 1rem; margin-bottom: 1rem; }
+     .buttons-row button { width: 100%; justify-content: center; padding-block: 0.85rem; }
+
+     .place-item {
+          padding: 1rem 0.5rem;
+          margin-bottom: 0;
+          border-radius: 0;
+          border: none;
+          border-bottom: 1px solid #27272a;
+          box-shadow: none;
+     }
+     .place-header-row { align-items: flex-start; }
+     .place-label { font-size: 1rem; }
+     .place-meta { font-size: 0.85rem; margin-top: 0.25rem; }
+
+     .badge { font-size: 0.7rem; padding: 0.15rem 0.5rem; margin-left: 0.5rem; }
+     .badge-stars { font-size: 0.85rem; letter-spacing: 0.14em; }
+     .rate-row { font-size: 0.8rem; gap: 0.25rem; margin-top: 0.55rem; }
+     .rate-row .star-button { width: 1.6rem; height: 1.6rem; font-size: 1.3rem; }
+
+     .custom-places-shell { margin-bottom: 1.1rem; }
+
+     /* Slightly smaller custom marker on compact screens */
+     .marker-custom {
+          filter: invert(20%) sepia(80%) saturate(200%) hue-rotate(130deg) brightness(1.05) contrast(1.05);
+          transform: scale(0.95);
+     }
+     .marker-custom:hover {
+          transform: scale(0.95);
+          filter: invert(20%) sepia(80%) saturate(200%) hue-rotate(130deg) brightness(1.05) contrast(1.05);
+     }
+}
+
+
+@media (max-width: 480px) {
+     .sidebar h2 {
+          font-size: 1.05rem;
+          margin-top: 0.3rem;
+          margin-bottom: 0.15rem;
+          text-align: center;
+     }
+     .sidebar small { text-align: center; margin-bottom: 0.4rem; }
+
+     .places-list {
+          margin-top: 0.35rem;
+          padding-right: 0;
+          max-height: 44vh;
+     }
+
+     .buttons-row button {
+          padding-block: 0.7rem;
+          font-size: 0.78rem;
+     }
+
+     /* hide footer to maximize vertical space on very small screens */
+     footer { display: none !important; }
+
+     .status {
+          top: 0.9rem;
+          font-size: 0.76rem;
+     }
+     .map-click-tooltip {
+          top: 0.55rem;
+          font-size: 0.72rem;
+          white-space: nowrap;
+     }
+}
+
+
+@media (pointer: coarse) {
+     button {
+          padding: 0.7rem 1.1rem;
+          font-size: 0.8rem;
+     }
+
+     .rate-row .star-button,
+     .popup-star-btn {
+          width: 1.4rem;
+          height: 1.4rem;
+          font-size: 1.1rem;
+     }
+}
+
+/* =========================
+    Animations
+    ========================= */
+
+@keyframes nav-swipe-hint {
+     0% { transform: translateX(-50%) translateY(0); opacity: 0.55; }
+     50% { transform: translateX(-50%) translateY(-6px); opacity: 0.9; }
+     100% { transform: translateX(-50%) translateY(0); opacity: 0.55; }
+}

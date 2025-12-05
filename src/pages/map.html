@@ -24,44 +24,50 @@
         <a href="./about.html">About</a>
     </div>
 </nav>
+<div class="nav-swipe-area"></div>
 
 <div class="background-glow"></div>
 
 <section class="map-main">
     <div class="map-shell">
         <div id="map"></div>
-        
-        <button id="sidebarToggleBtn" class="sidebar-toggle-btn" type="button">
-            🔎
-        </button>
 
-        <div class="status" id="status">Initializing map…</div>
+        <div id="loadingSpinner" class="loading-spinner-overlay"></div>
+        <div class="status is-visible" id="status">Initializing map…</div>
+        <div class="map-click-tooltip" id="mapClickTooltip">
+            Tap on the map to choose a location.
+        </div>
 
         <aside class="sidebar">
-            <div class="logo"><h2>Mate nearby</h2></div>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <h2>Mate nearby</h2>
+                    <small>Find shops or drop your own spots</small>
+                </div>
+
+                <div class="primary-strip">
+                    <button id="locateMeBtn" class="btn-secondary" type="button" style="width:100%; margin-bottom: 1rem;">
+                        Use my location
+                    </button>
+                    <div class="primary-radius">
+                        <label for="radiusInput">Search Radius</label>
+                        <input id="radiusInput" type="range" min="0.5" max="5" step="0.5" value="2">
+                        <div class="radius-display">
+                            <span id="radiusValue">2.0 km</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="search-card">
                 <div class="form-group">
-                    <label for="searchInput">Search location</label>
-                    <div class="search-row">
+                    <label for="searchInput">Search by place</label>
+                    <div class="search-row search-row-stacked">
                         <input id="searchInput" type="search" placeholder="City, street, shop…">
-                        <button id="locateMeBtn" class="btn-secondary btn-icon" type="button" aria-label="Use current location">
-                            📍
+                        <button id="searchBtn" class="btn-primary search-btn-full" type="button">
+                            Search
                         </button>
                     </div>
-                </div>
-
-                <div class="form-group radius-group">
-                    <label for="radiusInput">Search radius</label>
-                    <input id="radiusInput" type="range" min="0.5" max="5" step="0.5" value="2">
-                    <div class="radius-display">
-                        <span id="radiusValue">2.0 km</span>
-                    </div>
-                </div>
-
-                <div class="search-actions">
-                    <button id="searchBtn" class="btn-primary" type="button">Search</button>
-                    <button id="applyRadiusBtn" class="btn-secondary" type="button">Apply radius</button>
                 </div>
             </div>
 
@@ -71,6 +77,11 @@
                 </button>
 
                 <div class="custom-places-details" id="customPlacesDetails">
+                    <p class="info">
+                        Drop your own Mate spots on the map and share them with others.
+                        Choose a spot on the map, give it a short note and an optional Mate score.
+                    </p>
+
                     <div class="form-group">
                         <label for="placeName">Add custom place</label>
                         <input id="placeName" type="text" placeholder="Name of the place">
@@ -96,6 +107,10 @@
                         <button id="saveCustomPlaceBtn" class="btn-primary" type="button">
                             Save place
                         </button>
+                    </div>
+
+                    <div class="add-place-state" id="addPlaceState">
+                        Click mode: OFF. Use “Add by clicking map” to choose a spot.
                     </div>
                 </div>
 
@@ -178,6 +193,7 @@
 
     // --- DOM references ------------------------------------------------------
     const statusEl = document.getElementById('status');
+    const loadingSpinner = document.getElementById('loadingSpinner');
     const placesListEl = document.getElementById('placesList');
 
     const placeNameInput = document.getElementById('placeName');
@@ -193,12 +209,11 @@
 
     const radiusInput = document.getElementById('radiusInput');
     const radiusValueEl = document.getElementById('radiusValue');
-    const applyRadiusBtn = document.getElementById('applyRadiusBtn');
+    const applyRadiusBtn = document.getElementById('applyRadiusBtn'); // bleibt, aber ohne Button im DOM -> nullable
 
     const searchBtn = document.getElementById('searchBtn');
     const searchInput = document.getElementById('searchInput');
     const locateMeBtn = document.getElementById('locateMeBtn');
-    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
 
     // --- User id -------------------------------------------------------------
     function getOrCreateUserId() {
@@ -218,12 +233,28 @@
         return params.get(name);
     }
 
-    function setStatus(message, type = 'info') {
-        statusEl.textContent = message;
-        statusEl.classList.remove('status-error', 'status-success', 'status-info');
-        if (type === 'error') statusEl.classList.add('status-error');
-        else if (type === 'success') statusEl.classList.add('status-success');
-        else statusEl.classList.add('status-info');
+    let statusTimeout;
+
+    function setStatus(message, type = 'info', isLoading = false) {
+        if (loadingSpinner) {
+            if (isLoading) loadingSpinner.classList.add('is-visible');
+            else loadingSpinner.classList.remove('is-visible');
+        }
+
+        if (message) {
+            statusEl.textContent = message;
+            
+            statusEl.className = 'status is-visible';
+            if (type === 'error') statusEl.classList.add('status-error');
+            else if (type === 'success') statusEl.classList.add('status-success');
+            else statusEl.classList.add('status-info');
+
+            if (statusTimeout) clearTimeout(statusTimeout);
+
+            statusTimeout = setTimeout(() => {
+                statusEl.classList.remove('is-visible');
+            }, 3000);
+        }
     }
 
     function starsFromAverage(avg) {
@@ -641,7 +672,7 @@
     }
 
     async function loadSupermarkets(lat, lon) {
-        statusEl.textContent = 'Loading supermarkets around you…';
+        setStatus('Loading supermarkets around you…', 'info', true);
 
         const radiusMeters = searchRadiusMeters;
         const query = `
@@ -670,11 +701,11 @@
             placesListEl.innerHTML = '';
 
             if (!data.elements || data.elements.length === 0) {
-                statusEl.textContent = 'No supermarkets found nearby (within ~2 km).';
+                setStatus('No supermarkets found nearby (within ~2 km).');
                 return;
             }
 
-            statusEl.textContent = `Found ${data.elements.length} supermarkets.`;
+            setStatus(`Found ${data.elements.length} supermarkets.`);
 
             data.elements.forEach((el) => {
                 const plat = el.lat || (el.center && el.center.lat);
@@ -707,13 +738,13 @@
             renderPlacesList();
         } catch (err) {
             console.error(err);
-            statusEl.textContent = 'Failed to load supermarkets (Overpass API). Try again later.';
+            setStatus('Failed to load supermarkets (Overpass API). Try again later.', 'error');
         }
     }
 
     // --- Geocoding + bootstrap ----------------------------------------------
     async function geocodeQuery(query) {
-        statusEl.textContent = `Searching for "${query}"…`;
+        setStatus(`Searching for "${query}"…`, 'info', true);
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
 
         try {
@@ -723,11 +754,11 @@
             if (!res.ok) throw new Error('Geocoding failed: ' + res.status);
             const data = await res.json();
             if (!data.length) {
-                statusEl.textContent = `Could not find location for "${query}". Falling back to your GPS location.`;
+                setStatus(`Could not find location for "${query}". Falling back to your GPS location.`, 'error');
                 return null;
             }
             const { lat, lon, display_name } = data[0];
-            statusEl.textContent = `Showing results for: ${display_name}`;
+            setStatus(`Showing results for: ${display_name}`);
             return {
                 lat: parseFloat(lat),
                 lon: parseFloat(lon),
@@ -735,7 +766,7 @@
             };
         } catch (e) {
             console.error(e);
-            statusEl.textContent = 'Geocoding failed. Falling back to your GPS location.';
+            setStatus('Geocoding failed. Falling back to your GPS location.', 'error');
             return null;
         }
     }
@@ -757,6 +788,7 @@
     async function bootstrap() {
         await preloadRatings();
         wireInputFocusHelpers();
+        initNavSwipeToSidebar();
 
         const params = new URLSearchParams(window.location.search);
         const latParam = params.get('lat');
@@ -771,7 +803,7 @@
             initMap(lat, lon, zoom);
             await loadCustomPlacesFromFirebase();
             await loadSupermarkets(lat, lon);
-            statusEl.textContent = 'Opened view.';
+            setStatus('Opened view.');
             return;
         }
 
@@ -787,7 +819,7 @@
         }
 
         if (!navigator.geolocation) {
-            statusEl.textContent = 'Geolocation not available. Centering map on Berlin.';
+            setStatus('Geolocation not available. Centering map on Berlin.', 'error');
             const fallbackLat = 52.52;
             const fallbackLon = 13.405;
             initMap(fallbackLat, fallbackLon, 13);
@@ -796,19 +828,19 @@
             return;
         }
 
-        statusEl.textContent = 'Requesting your location…';
+        setStatus('Requesting your location…', 'info', true);
 
         navigator.geolocation.getCurrentPosition(
             async (pos) => {
                 const { latitude, longitude } = pos.coords;
                 initMap(latitude, longitude, 15);
                 await loadCustomPlacesFromFirebase();
-                statusEl.textContent = 'Location acquired. Loading supermarkets…';
+                setStatus('Location acquired. Loading supermarkets…', 'info', true);
                 await loadSupermarkets(latitude, longitude);
             },
             async (err) => {
                 console.warn('Geolocation error', err);
-                statusEl.textContent = 'Could not get your location (permission denied?). Centering map on Berlin.';
+                setStatus('Could not get your location (permission denied?). Centering map on Berlin.', 'error');
                 const fallbackLat = 52.52;
                 const fallbackLon = 13.405;
                 initMap(fallbackLat, fallbackLon, 13);
@@ -916,7 +948,7 @@
                 setStatus('Geolocation not available on this device.', 'error');
                 return;
             }
-            setStatus('Locating you…', 'info');
+            setStatus('Locating you…', 'info', true);
             navigator.geolocation.getCurrentPosition(
                 async (pos) => {
                     const { latitude, longitude } = pos.coords;
@@ -942,13 +974,6 @@
                 }
             );
         });
-
-        // Sidebar toggle (mobile)
-        sidebarToggleBtn?.addEventListener('click', () => {
-            const sidebar = document.querySelector('.sidebar');
-            if (!sidebar) return;
-            const isOpen = sidebar.classList.toggle('is-open');
-        });
     }
 
     // --- Popup rating click delegation --------------------------------------
@@ -968,6 +993,123 @@
 
             submitRating(place, score);
         });
+    }
+
+    function initNavSwipeToSidebar() {
+        const swipeArea = document.querySelector('.nav-swipe-area');
+        const sidebar = document.querySelector('.sidebar');
+        if (!swipeArea || !sidebar) return;
+
+        let startY = null;
+        let currentY = null;
+        let isTracking = false;
+        let wasSidebarOpenAtStart = false;
+        const openThreshold = 60;
+        const closeThreshold = 40;
+
+        const startTracking = (clientY, fromSidebarTop = false) => {
+            if (window.innerWidth > 900) return;
+            if (fromSidebarTop && !sidebar.classList.contains('is-open')) return;
+            startY = clientY;
+            currentY = startY;
+            isTracking = true;
+            wasSidebarOpenAtStart = sidebar.classList.contains('is-open');
+            sidebar.style.transition = 'none';
+        };
+
+        const onTouchStartSwipeArea = (e) => {
+            const touch = e.touches[0];
+            startTracking(touch.clientY, false);
+        };
+
+        const onTouchStartSidebar = (e) => {
+            const rect = sidebar.getBoundingClientRect();
+            const touch = e.touches[0];
+            if (touch.clientY <= rect.top + 40) {
+                startTracking(touch.clientY, true);
+            }
+        };
+
+        const onTouchMove = (e) => {
+            if (!isTracking || window.innerWidth > 900) return;
+            const touch = e.touches[0];
+            currentY = touch.clientY;
+
+            const deltaY = startY - currentY;
+
+            if (deltaY > 0 && !wasSidebarOpenAtStart) {
+                const maxTranslate = window.innerHeight * 0.7;
+                const progress = Math.min(deltaY / maxTranslate, 1);
+                const translateY = (1 - progress) * 100;
+
+                sidebar.classList.add('is-open');
+                sidebar.style.transform = `translateY(${translateY}%) scale(${0.96 + 0.04 * progress})`;
+                sidebar.style.opacity = String(0.3 + 0.7 * progress);
+                document.body.classList.add('sidebar-open');
+            }
+
+            if (deltaY < 0 && wasSidebarOpenAtStart) {
+                const maxTranslate = window.innerHeight * 0.7;
+                const progress = Math.min(Math.abs(deltaY) / maxTranslate, 1);
+                const translateY = progress * 100;
+
+                sidebar.classList.add('is-open');
+                sidebar.style.transform = `translateY(${translateY}%) scale(${1 - 0.04 * progress})`;
+                sidebar.style.opacity = String(1 - 0.7 * progress);
+                if (progress > 0.2) {
+                    document.body.classList.remove('sidebar-open');
+                }
+            }
+        };
+
+        const onTouchEnd = () => {
+            if (!isTracking) return;
+            isTracking = false;
+
+            const deltaY = startY - currentY;
+            sidebar.style.transition = '';
+
+            if (deltaY > 0 && !wasSidebarOpenAtStart) {
+                if (deltaY > openThreshold) {
+                    sidebar.classList.add('is-open');
+                    sidebar.style.transform = '';
+                    sidebar.style.opacity = '';
+                    document.body.classList.add('sidebar-open');
+                } else {
+                    sidebar.classList.remove('is-open');
+                    sidebar.style.transform = '';
+                    sidebar.style.opacity = '';
+                    document.body.classList.remove('sidebar-open');
+                }
+            }
+
+            if (deltaY < 0 && wasSidebarOpenAtStart) {
+                if (Math.abs(deltaY) > closeThreshold) {
+                    sidebar.classList.remove('is-open');
+                    sidebar.style.transform = '';
+                    sidebar.style.opacity = '';
+                    document.body.classList.remove('sidebar-open');
+                } else {
+                    sidebar.classList.add('is-open');
+                    sidebar.style.transform = '';
+                    sidebar.style.opacity = '';
+                    document.body.classList.add('sidebar-open');
+                }
+            }
+
+            startY = null;
+            currentY = null;
+        };
+
+        swipeArea.addEventListener('touchstart', onTouchStartSwipeArea, { passive: true });
+        swipeArea.addEventListener('touchmove', onTouchMove, { passive: true });
+        swipeArea.addEventListener('touchend', onTouchEnd);
+        swipeArea.addEventListener('touchcancel', onTouchEnd);
+
+        sidebar.addEventListener('touchstart', onTouchStartSidebar, { passive: true });
+        sidebar.addEventListener('touchmove', onTouchMove, { passive: true });
+        sidebar.addEventListener('touchend', onTouchEnd);
+        sidebar.addEventListener('touchcancel', onTouchEnd);
     }
 
     document.addEventListener('DOMContentLoaded', bootstrap);

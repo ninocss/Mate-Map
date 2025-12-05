@@ -1,5 +1,6 @@
 @import url('./index.css');
 @import url('./map.css');
+@import url('./responsivness.css');
 
 :root {
     --gold-primary: #E5C15D;
@@ -80,7 +81,7 @@ nav {
     top: 1.5rem;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 400;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -153,6 +154,49 @@ nav {
     transform: translateY(-1px);
     box-shadow: 0 4px 15px rgba(229, 193, 93, 0.3);
     color: #000;
+} 
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+    nav {
+        top: auto;
+        bottom: 1.5rem;
+        width: calc(100% - 2rem);
+        padding: 0.5rem;
+        flex-direction: row;
+        justify-content: space-between;
+        border-radius: 20px;
+        background: rgba(26, 26, 29, 0.85);
+    }
+
+    .logo {
+        display: none;
+    }
+
+    .nav-links {
+        width: 100%;
+        justify-content: space-between;
+        background: transparent;
+        border: none;
+        padding: 0;
+        gap: 0;
+    }
+
+    .nav-links a {
+        padding: 0.75rem;
+        font-size: 0.8rem;
+        flex: 1;
+        text-align: center;
+        border-radius: 12px;
+    }
+
+    .nav-links a.cta {
+        margin-left: 0;
+    }
+
+    footer {
+        display: none;
+    }
 }
 
 /* Footer */
@@ -203,5 +247,13 @@ footer {
         flex-direction: row;
         justify-content: space-between;
         text-align: left;
+    }
+}
+
+@media (max-width: 768px) {
+    body.sidebar-open nav {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-50%) translateY(10px);
     }
 }
